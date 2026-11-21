@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Daylight Almanac: the live sky, anywhere on Earth</title>
+  <meta name="description" content="A live almanac of the sun, the moon and the stars. Scrub through any day, anywhere on Earth, and watch the real sky change." />
+  <meta name="theme-color" content="#f3ede1" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=2" />
+</head>
+<body class="no-trans" data-theme="day" data-phase="day">
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <div class="mast-rail">
+      <span>Vol. <span id="vol">—</span> · No. <span id="issue">—</span></span>
+      <span class="mast-edition" id="edition">—</span>
+      <span id="longdate">—</span>
+    </div>
+    <h1 class="mast-title">The <em>Daylight</em> Almanac</h1>
+    <p class="mast-sub">The sun, the moon and the stars, worked out live in your browser for any place and any day.</p>
+
+    <div class="controls" role="group" aria-label="Place and date">
+      <div class="control">
+        <label for="place">Place</label>
+        <div class="control-row">
+          <select id="place"></select>
+          <button class="icon-btn" id="locate" type="button" title="Use my location" aria-label="Use my location">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5" fill="none"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="control coords" id="coordsCtl">
+        <label for="lat">Latitude / Longitude</label>
+        <div class="control-row">
+          <input id="lat" type="number" step="0.0001" min="-90" max="90" inputmode="decimal" aria-label="Latitude" />
+          <input id="lng" type="number" step="0.0001" min="-180" max="180" inputmode="decimal" aria-label="Longitude" />
+          <button class="text-btn" id="applyCoords" type="button">Go</button>
+        </div>
+      </div>
+      <div class="control">
+        <label for="date">Date</label>
+        <div class="control-row">
+          <button class="icon-btn" id="prevDay" type="button" aria-label="Previous day" title="Previous day ( [ )">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none"/></svg>
+          </button>
+          <input id="date" type="date" />
+          <button class="icon-btn" id="nextDay" type="button" aria-label="Next day" title="Next day ( ] )">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage" aria-label="Live sky panorama">
+      <canvas id="sky" aria-hidden="true"></canvas>
+      <div class="stage-overlay">
+        <div class="clock">
+          <div class="clock-time" id="clockTime">--:--</div>
+          <div class="clock-meta" id="clockMeta">—</div>
+        </div>
+        <div class="stage-right">
+          <div class="phase-chip"><span class="phase-dot"></span><span id="phaseName">—</span></div>
+          <dl class="readout">
+            <div><dt>Sun</dt><dd id="roSun">—</dd></div>
+            <div><dt>Moon</dt><dd id="roMoon">—</dd></div>
+            <div><dt>Shadow</dt><dd id="roShadow">—</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="stage-hint" id="hint">Drag the sky to move through the day</div>
+      <div class="facing" id="facing">Facing south</div>
+    </section>
+
+    <section class="scrubber" aria-label="Time of day">
+      <button class="play" id="play" type="button" aria-label="Play the day" title="Play / pause (Space)">
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg>
+      </button>
+      <div class="track">
+        <div class="band" id="band"></div>
+        <div class="pins" id="pins" aria-hidden="true"></div>
+        <input id="time" type="range" min="0" max="1439" step="1" value="0" aria-label="Time of day" />
+        <div class="ticks" aria-hidden="true">
+          <span>00</span><span>03</span><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span>
+        </div>
+      </div>
+      <div class="scrub-side">
+        <button class="live" id="live" type="button" title="Jump to now (N)"><span class="live-dot"></span>Now</button>
+        <select id="speed" aria-label="Playback speed">
+          <option value="10">10 min/s</option>
+          <option value="60" selected>1 hr/s</option>
+          <option value="240">4 hr/s</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="note" aria-live="polite">
+      <p class="note-kicker">Right now, outside</p>
+      <p class="note-text" id="note">—</p>
+    </section>
+
+    <section class="columns">
+      <article class="col">
+        <h2><span class="col-num">I.</span> The Sun</h2>
+        <dl class="ledger" id="sunLedger"></dl>
+        <p class="col-foot" id="sunFoot"></p>
+      </article>
+
+      <article class="col">
+        <h2><span class="col-num">II.</span> The Light</h2>
+        <div class="light-split">
+          <div>
+            <h3>Morning</h3>
+            <ul class="spans" id="lightMorning"></ul>
+          </div>
+          <div>
+            <h3>Evening</h3>
+            <ul class="spans" id="lightEvening"></ul>
+          </div>
+        </div>
+        <p class="col-foot">Golden hour: sun between −4° and +6°. Blue hour: −6° to −4°.</p>
+      </article>
+
+      <article class="col">
+        <h2><span class="col-num">III.</span> The Moon</h2>
+        <div class="moon-head">
+          <svg class="moon-svg" id="moonSvg" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <radialGradient id="moonShade" cx="42%" cy="40%" r="65%">
+                <stop offset="0%" stop-color="#fbf8ea" />
+                <stop offset="100%" stop-color="#d9d3bd" />
+              </radialGradient>
+            </defs>
+            <circle cx="50" cy="50" r="46" class="moon-dark" />
+            <g id="moonFlip"><path id="moonLit" fill="url(#moonShade)" d="" /></g>
+            <circle cx="50" cy="50" r="46" class="moon-rim" />
+          </svg>
+          <div>
+            <p class="moon-phase" id="moonPhase">—</p>
+            <p class="moon-sub" id="moonSub">—</p>
+          </div>
+        </div>
+        <dl class="ledger" id="moonLedger"></dl>
+      </article>
+
+      <article class="col col-wide">
+        <h2><span class="col-num">IV.</span> The Year in Daylight</h2>
+        <div class="year-wrap">
+          <svg id="yearChart" viewBox="0 0 760 220" role="img" aria-label="Hours of daylight through the year"></svg>
+          <div class="year-tip" id="yearTip" hidden></div>
+        </div>
+        <p class="col-foot" id="yearFoot"></p>
+      </article>
+    </section>
+
+    <section class="legend" aria-label="Legend">
+      <span><i class="sw sw-night"></i>Night</span>
+      <span><i class="sw sw-astronomical"></i>Astronomical twilight</span>
+      <span><i class="sw sw-nautical"></i>Nautical twilight</span>
+      <span><i class="sw sw-blue"></i>Blue hour</span>
+      <span><i class="sw sw-golden"></i>Golden hour</span>
+      <span><i class="sw sw-day"></i>Daylight</span>
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <p><strong>Colophon.</strong> Positions come from low-precision solar and lunar theory, the same formulas published at aa.quae.nl, and run entirely in your browser, with no APIs and no tracking. Rise and set times are good to about a minute, and lunar phase dates to a few hours. The sky has 29 named stars plus 700 faint ones on fixed seeds, and they turn with real sidereal time.</p>
+    <p class="keys"><kbd>←</kbd><kbd>→</kbd> 5 min · <kbd>Shift</kbd>+arrows 1 hr · <kbd>Space</kbd> play · <kbd>N</kbd> now · <kbd>[</kbd><kbd>]</kbd> day</p>
+  </footer>
+
+  <script src="js/astro.js?v=2"></script>
+  <script src="js/sky.js?v=2"></script>
+  <script src="js/app.js?v=2"></script>
+</body>
+</html>
