@@ -6,6 +6,7 @@
 
 **The live sky, anywhere on Earth.** A zero-dependency astronomical almanac that renders the real sun, moon, twilight bands, and sidereal starfield for any place and date — styled like a printed editorial broadsheet that shifts from warm paper by day to deep observatory ink at night.
 
+[![Live Demo](https://img.shields.io/badge/▶%20LIVE%20DEMO-Cloudflare%20Pages-F38020?style=for-the-badge&logo=cloudflarepages&logoColor=white)](https://daylight-almanac.pages.dev)
 [![HTML5](https://img.shields.io/badge/HTML5-Canvas_2D-b9472a?style=for-the-badge&logo=html5&logoColor=white)](./index.html)
 [![CSS3](https://img.shields.io/badge/CSS3-Day_%2F_Night_Theme-5470b4?style=for-the-badge&logo=css3&logoColor=white)](./css/styles.css)
 [![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_Ephemeris-f0a65c?style=for-the-badge&logo=javascript&logoColor=black)](./js/astro.js)
